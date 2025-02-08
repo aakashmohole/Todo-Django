@@ -1,5 +1,31 @@
+{% extends "./base.html" %}
 {% block content %}
-<h2>Welcome, {{ username }}!</h2>
-<p>Your Token: {{ token }}</p>
+
+<body class="leading-normal tracking-normal text-white gradient" style="font-family: 'Source Sans Pro', sans-serif;">
+    <nav class="fixed w-full z-30 top-0 text-white">
+      <div class="w-full container mx-auto flex flex-wrap items-center justify-between py-2">
+        <div class="pl-4 flex items-center">
+          <a class="text-white font-bold text-2xl lg:text-4xl" href="#">Todo App</a>
+        </div>
+      </div>
+    </nav>
+    <form action="" method="POST">
+    {% csrf_token %}
+    <div class="pt-24 container mx-auto px-4 flex justify-center">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-lg w-full">
+          <h1 class="text-3xl font-bold text-center mb-4">Manage Your Tasks</h1>
+          <div class="flex items-center ml-20 mb-4">
+            <input id="taskInput" type="text" class="w-2/3 p-2 text-black rounded-l-lg" placeholder="Add a new task..." />
+            <button id="addTask" class="bg-green-500 p-2 rounded-r-lg text-white">Add</button>
+          </div>
+          <ul id="taskList" class="list-none space-y-2"></ul>
+        </div>
+      </div>
+    </form>
+      
+    </div>
+
 <a href="/auth/logout/">Logout</a>
+    
+
 {% endblock %}
