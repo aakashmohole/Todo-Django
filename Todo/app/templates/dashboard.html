@@ -1,31 +1,97 @@
 {% extends "./base.html" %}
 {% block content %}
 
-<body class="leading-normal tracking-normal text-white gradient" style="font-family: 'Source Sans Pro', sans-serif;">
-    <nav class="fixed w-full z-30 top-0 text-white">
-      <div class="w-full container mx-auto flex flex-wrap items-center justify-between py-2">
-        <div class="pl-4 flex items-center">
-          <a class="text-white font-bold text-2xl lg:text-4xl" href="#">Todo App</a>
+<body class="bg-[#161616] text-white font-sans">
+    <!-- Navbar -->
+    <nav class="fixed w-full top-0 bg-gray-800 shadow-lg py-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a class="text-white font-bold text-2xl lg:text-3xl">Todo App</a>
+            <a href="{% url 'logout' %}" class="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded-lg">Logout</a>
         </div>
-      </div>
     </nav>
-    <form action="" method="POST">
-    {% csrf_token %}
-    <div class="pt-24 container mx-auto px-4 flex justify-center">
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-lg w-full">
-          <h1 class="text-3xl font-bold text-center mb-4">Manage Your Tasks</h1>
-          <div class="flex items-center ml-20 mb-4">
-            <input id="taskInput" type="text" class="w-2/3 p-2 text-black rounded-l-lg" placeholder="Add a new task..." />
-            <button id="addTask" class="bg-green-500 p-2 rounded-r-lg text-white">Add</button>
-          </div>
-          <ul id="taskList" class="list-none space-y-2"></ul>
+
+    <!-- Main Content -->
+    <div class="container mx-auto mt-24 px-4">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-3xl mx-auto">
+            <h1 class="text-3xl font-bold text-center mb-6">Manage Your Tasks</h1>
+
+            <!-- Task Input -->
+            <form method="POST" class="flex mb-6">
+                {% csrf_token %}
+                <input id="taskInput" type="text" name="task" class="w-full p-3 text-black rounded-l-lg" placeholder="Add a new task..." required />
+                <button type="submit" class="bg-green-500 hover:bg-green-600 px-4 py-3 rounded-r-lg text-white transition duration-300">Add</button>
+            </form>
+
+            <!-- Task List -->
+            <ul id="taskList" class="space-y-3">
+                {% for task in tasks %}
+                <li class="flex items-center justify-between bg-gray-700 p-4 rounded-lg shadow transition duration-300 hover:scale-105">
+                    <span class="text-lg {% if task.completed %} line-through text-gray-400 {% endif %}">{{ task.name }}</span>
+                    <div class="space-x-2">
+                        <form method="POST" action="{% url 'complete_task' task.id %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg transition duration-300">✅</button>
+                        </form>
+                        <form method="POST" action="{% url 'delete_task' task.id %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition duration-300">❌</button>
+                        </form>
+                    </div>
+                </li>
+                {% empty %}
+                <p class="text-center text-gray-400">No tasks yet. Add a new one!</p>
+                {% endfor %}
+            </ul>
         </div>
-      </div>
-    </form>
-      
+
+        <!-- Charts Section -->
+        <div class="mt-10 flex flex-wrap justify-center gap-6">
+            <!-- Pie Chart -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-bold text-center mb-4">Task Completion Rate</h2>
+                <canvas id="pieChart" width="300" height="300"></canvas>
+            </div>
+
+            <!-- Bar Chart -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-bold text-center mb-4">Task Breakdown</h2>
+                <canvas id="barChart" width="400" height="300"></canvas>
+            </div>
+        </div>
     </div>
 
-<a href="/auth/logout/">Logout</a>
-    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const totalTasks = {{ tasks.count }};
+        const completedTasks = {{ tasks|dictsort:"completed"|slice:"1"|length }};
+        const pendingTasks = totalTasks - completedTasks;
+
+        const ctxPie = document.getElementById("pieChart").getContext("2d");
+        new Chart(ctxPie, {
+            type: "doughnut",
+            data: {
+                labels: ["Completed", "Pending"],
+                datasets: [{
+                    data: [completedTasks, pendingTasks],
+                    backgroundColor: ["#10B981", "#EF4444"]
+                }]
+            }
+        });
+
+        const ctxBar = document.getElementById("barChart").getContext("2d");
+        new Chart(ctxBar, {
+            type: "bar",
+            data: {
+                labels: ["Total", "Completed", "Pending"],
+                datasets: [{
+                    data: [totalTasks, completedTasks, pendingTasks],
+                    backgroundColor: ["#3B82F6", "#10B981", "#EF4444"]
+                }]
+            }
+        });
+    </script>
+
+</body>
 
 {% endblock %}
