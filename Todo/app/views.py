@@ -7,13 +7,12 @@ from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.views import View
 import jwt
-
+from Todo.settings import SECRET_KEY
 
 # Create your views here.
 User  = get_user_model()
 
 
-SECRET_KEY = 'asdfghjkl'
 class DashboardView(View):
     def get(self, request):
         return render(request, 'dashboard.html')
